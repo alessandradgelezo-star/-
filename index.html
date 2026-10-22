@@ -44,48 +44,8 @@
             return slide;
         }
 
-        // Исправленная функция: убрана ошибка с пустым присваиванием
         function urlJoin(url, concat) {
             var parts = url.split('/').concat(concat.split('/'));
-            var result = ;
+            var result = ;  // <-- ИСПРАВЛЕНИЕ: пустой массив вместо ";"
             for (var i = 0; i < parts.length; i++) {
-                if (parts[i] === '..') {
-                    result.pop();
-                } else if (parts[i] !== '.' && parts[i] !== '') {
-                    result.push(parts[i]);
-                }
-            }
-            return result.join('/');
-        }
-
-        function buildStoryMap(data) {
-            if (!data || !data.storymap) { 
-                document.getElementById('storymap-embed').innerHTML = '<h3 style="color:#003366;padding:20px;">Ошибка: не удалось загрузить данные карты.</h3><p style="padding:0 20px;color:#555;">Проверьте, опубликован ли проект в KnightLab.</p>';
-                return; 
-            }
-            var options = { script_path: getScriptPath(/storymap(-min)?\.js/), start_at_slide: getStartSlide() };
-            var font = "stock:default";
-            if(data.font_css) font = data.font_css;
-            if(font.indexOf("stock:") == 0) {
-                var font_name = font.split(':');
-                var base_url = urlJoin(options.script_path, "../css/fonts");
-                font = urlJoin(base_url, "font." + font_name + ".css");
-            } else if(!font.match('^(http|https|//)')) {
-                font = urlJoin(options.script_path, font);
-            }
-            KLStoryMap.loadCSS(font, function(){});
-            storymap = new KLStoryMap.StoryMap('storymap-embed', data, options, { title: onStoryMapTitle });
-        }
-
-        fetch(storymap_url)
-            .then(response => { if (!response.ok) throw new Error('Network error'); return response.json(); })
-            .then(data => buildStoryMap(data))
-            .catch(error => {
-                console.error('Ошибка загрузки:', error);
-                document.getElementById('storymap-embed').innerHTML = '<h3 style="color:#003366;padding:20px;">Не удалось загрузить карту.</h3><p style="padding:0 20px;color:#555;">Проверьте консоль (F12) или статус публикации в KnightLab.</p>';
-            });
-
-        window.onresize = function() { if(storymap) storymap.updateDisplay(); };
-    </script>
-</body>
-</html>
+                if (parts[i]
