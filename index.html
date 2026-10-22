@@ -21,7 +21,11 @@
         var storymap;
         var storymap_url = '//uploads.knightlab.com/storymapjs/8ec900e5c9c3862f3196ce838c0270dd/literaturnaia-karta-ulits-diatlovo/published.json';
         const urlParams = new URLSearchParams(window.location.search);
-        function onStoryMapTitle(e) { document.title = "StoryMapJS: " + e.title; };
+        
+        function onStoryMapTitle(e) {
+            document.title = "StoryMapJS: " + e.title;
+        }
+
         function getScriptPath(scriptname) {
             var scriptTags = document.getElementsByTagName('script');
             for(var i = 0; i < scriptTags.length; i++) {
@@ -31,6 +35,7 @@
             }
             return '';
         }
+
         function getStartSlide() {
             var slide = 0;
             if (urlParams.has('start_at_slide')) {
@@ -38,19 +43,25 @@
             }
             return slide;
         }
+
         function urlJoin(url, concat) {
-            function build(parts,container) {
+            var url_parts = ;
+            function build(parts, container) {
                 for (var i = 0, l = parts.length; i < l; i++) {
-                    if (parts[i] == '..') { container.pop(); }
-                    else if (parts[i] == '.') { continue; }
-                    else { container.push(parts[i]); }
+                    if (parts[i] == '..') { 
+                        container.pop(); 
+                    } else if (parts[i] == '.') { 
+                        continue; 
+                    } else { 
+                        container.push(parts[i]); 
+                    }
                 }
             }
-            var url_parts = ;
-            build(url.split('/'),url_parts);
-            build(concat.split('/'),url_parts);
+            build(url.split('/'), url_parts);
+            build(concat.split('/'), url_parts);
             return url_parts.join('/');
         }
+
         function buildStoryMap(data) {
             if (!data || !data.storymap) { 
                 document.getElementById('storymap-embed').innerHTML = '<h3 style="color:#003366;padding:20px;">Ошибка: не удалось загрузить данные карты.</h3><p style="padding:0 20px;color:#555;">Проверьте, опубликован ли проект в KnightLab.</p>';
@@ -69,6 +80,7 @@
             KLStoryMap.loadCSS(font, function(){});
             storymap = new KLStoryMap.StoryMap('storymap-embed', data, options, { title: onStoryMapTitle });
         }
+
         fetch(storymap_url)
             .then(response => { if (!response.ok) throw new Error('Network error'); return response.json(); })
             .then(data => buildStoryMap(data))
@@ -76,6 +88,7 @@
                 console.error('Ошибка загрузки:', error);
                 document.getElementById('storymap-embed').innerHTML = '<h3 style="color:#003366;padding:20px;">Не удалось загрузить карту.</h3><p style="padding:0 20px;color:#555;">Проверьте консоль (F12) или статус публикации в KnightLab.</p>';
             });
+
         window.onresize = function() { if(storymap) storymap.updateDisplay(); };
     </script>
 </body>
