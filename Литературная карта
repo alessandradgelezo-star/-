@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Литературная карта улиц Дятлово</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- Подключаем стили и скрипт StoryMapJS -->
+    <link rel="stylesheet" href="//cdn.knightlab.com/libs/storymapjs/latest/css/storymap.css">
+    <script type="text/javascript" src="//cdn.knightlab.com/libs/storymapjs/latest/js/storymap-min.js"></script>
+
+    <style>
+        /* Гарантируем, что страница занимает всё место */
+        html, body {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+            overflow: hidden; /* Убираем скролл у самой страницы */
+        }
+
+        #storymap-embed {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* --- ВАШИ СТИЛИ --- */
+        
+        /* Убираем пунктирные линии */
+        .sm-slide-separator {
+            display: none !important;
+        }
+
+        /* Темно-синий цвет текста (#003366) */
+        .sm-title, 
+        .sm-byline, 
+        .sm-description, 
+        .sm-slide-content, 
+        .sm-nav-btn,
+        .sm-nav-btn span {
+            color: #003366 !important;
+        }
+
+        /* Белый фон для всех основных блоков */
+        .sm-container, 
+        .sm-slide, 
+        .sm-header, 
+        .sm-footer,
+        .sm-map-container {
+            background-color: #ffffff !important;
+        }
+        
+        /* Опционально: если карта (Leaflet) тоже стала белой, вернем ей стандартный вид */
+        .leaflet-container {
+            background-color: #f0f0f0 !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="storymap-embed"></div>
+
+    <script type="text/javascript">
+        var storymap;
+        // Ссылка на ваш JSON с данными карты
+        var storymap_url = '//uploads.knightlab.com/storymapjs/8ec900e5c9c3862f3196ce838c0270dd/literaturnaia-karta-ulits-diatlovo/published.json';
+        
+        const urlParams = new URLSearchParams(window.location.search);
+
+        function onStoryMapTitle(e) {
+            document.title = "StoryMapJS: " + e.title;
+        };
+
+        function getScriptPath(scriptname) {
+            var scriptTags = document.getElementsByTagName('script');
+            for(var i = 0; i < scriptTags.length; i++) {
+                if(scriptTags[i].src.match(scriptname)) {
+                    var script_path = scriptTags[i].src;
+                    return script_path.split('?').split('/').slice(0, -1).join('/');
+                }
+            }
+            return '';
+        }
+
+        function getStartSlide() {
+            var slide = 0;
+            if (urlParams.has('start_at_slide')) {
+                slide = parseInt(urlParams.get('start_at_slide'), 10);
+            }
+            return slide;
+        }
+
+        function urlJoin(url, concat) {
+            function build(parts,container) {
+                for (var i = 0, l = parts.length; i < l; i++) {
+                    if (parts[i] == '..') {
+                        container.pop();
+                    } else if (parts[i] == '.') {
+                        continue;
+                    } else {
+                        container.push(parts[i]);
+                    }
+                }
+            }
+            var url_parts = ;
+            build(url.split('/'),url_parts);
+            build(concat.split('/'),url_parts);
+            return url_parts.join('/');
+        }
+
+        function buildStoryMap(data) {
+            if (!data || !data.storymap) { 
+                console.error('Не удалось загрузить данные карты. Проверьте ссылку на JSON.');
+                return; 
+            }
+            var options = {
+                script_path: getScriptPath(/storymap(-min)?\.js/),
+                start_at_slide: getStartSlide()
+            };
+            var font = "stock:default";
+            if(data.font_css) {
+                font = data.font_css;
+            }
+            if(font.indexOf("stock:") == 0) {
+                var font_name = font.split(':');
+                var base_url = urlJoin(options.script_path,"../css/fonts");
+                font = urlJoin(base_url, "font." + font_name + ".css");
+            } else if(!font.match('^(http|https|//)')) {
+                font = urlJoin(options.script_path, font);
+            }
+            
+            KLStoryMap.loadCSS(font, function(){ 
+                console.log('Шрифт загружен');
+            });
+
+            storymap = new KLStoryMap.StoryMap('storymap-embed', data, options, {
+                title: onStoryMapTitle
+            });
+            
+            var mapType = storymap.options.map_type;
+            if(mapType && mapType.match('^zoomify.*')) {
+                // ga('send', 'event', 'StoryMapJS', 'zoomify', document.referrer);
+            }
+        }
+
+        // Загрузка данных
+        (function() {
+            fetch(storymap_url)
+                .then(response => {
+                    if (!response.ok) throw new Error('Ошибка сети: ' + response.status);
+                    return response.json();
+                })
+                .then(data => buildStoryMap(data))
+                .catch(error => {
+                    console.error('Ошибка загрузки StoryMap:', error);
+                    document.getElementById('storymap-embed').innerHTML = 
+                        '<h3 style="color: #003366; padding: 20px;">Ошибка загрузки карты.</h3>' +
+                        '<p style="color: #555; padding: 0 20px;">Проверьте консоль (F12) или убедитесь, что файл опубликован в KnightLab.</p>';
+                });
+        })();
+
+        window.onresize = function(event) {
+            if(storymap) {
+                storymap.updateDisplay();
+            }
+        }
+    </script>
+</body>
+</html>
