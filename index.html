@@ -44,22 +44,18 @@
             return slide;
         }
 
+        // Исправленная функция: убрана ошибка с пустым присваиванием
         function urlJoin(url, concat) {
-            var url_parts = ;
-            function build(parts, container) {
-                for (var i = 0, l = parts.length; i < l; i++) {
-                    if (parts[i] == '..') { 
-                        container.pop(); 
-                    } else if (parts[i] == '.') { 
-                        continue; 
-                    } else { 
-                        container.push(parts[i]); 
-                    }
+            var parts = url.split('/').concat(concat.split('/'));
+            var result = ;
+            for (var i = 0; i < parts.length; i++) {
+                if (parts[i] === '..') {
+                    result.pop();
+                } else if (parts[i] !== '.' && parts[i] !== '') {
+                    result.push(parts[i]);
                 }
             }
-            build(url.split('/'), url_parts);
-            build(concat.split('/'), url_parts);
-            return url_parts.join('/');
+            return result.join('/');
         }
 
         function buildStoryMap(data) {
@@ -72,7 +68,7 @@
             if(data.font_css) font = data.font_css;
             if(font.indexOf("stock:") == 0) {
                 var font_name = font.split(':');
-                var base_url = urlJoin(options.script_path,"../css/fonts");
+                var base_url = urlJoin(options.script_path, "../css/fonts");
                 font = urlJoin(base_url, "font." + font_name + ".css");
             } else if(!font.match('^(http|https|//)')) {
                 font = urlJoin(options.script_path, font);
